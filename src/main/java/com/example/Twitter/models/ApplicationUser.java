@@ -42,6 +42,36 @@ public class ApplicationUser {
     @JsonIgnore
     private String password;
 
+    private String bio;
+    private String nickname;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "profile_picture", referencedColumnName = "image_id")
+    private Image profilePicture;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "banner_picture", referencedColumnName = "image_id")
+    private Image bannerPicture;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "following",
+            joinColumns = {@JoinColumn(name = "user_id")},
+            inverseJoinColumns = {@JoinColumn(name = "following_id")}
+    )
+    @JsonIgnore
+    private Set<ApplicationUser> following;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "followers",
+            joinColumns = {@JoinColumn(name = "user_id")},
+            inverseJoinColumns = {@JoinColumn(name = "follower_id")}
+    )
+    @JsonIgnore
+    private Set<ApplicationUser> followers;
+
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_role_junction",
@@ -51,7 +81,10 @@ public class ApplicationUser {
     private Set<Role>authorities;
 
     public ApplicationUser(){
-        this.authorities = new HashSet<>(); this.enabled = false;
+        this.authorities = new HashSet<>();
+        this.following = new HashSet<>();
+        this.followers = new HashSet<>();
+        this.enabled = false;
     }
 
     public Integer getUserId() {
@@ -142,6 +175,39 @@ public class ApplicationUser {
         this.verification = verification;
     }
 
+    public Image getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(Image profilePicture) {
+        this.profilePicture = profilePicture;
+    }
+
+    public Image getBannerPicture() {
+        return bannerPicture;
+    }
+
+    public void setBannerPicture(Image bannerPicture) {
+        this.bannerPicture = bannerPicture;
+    }
+
+    public Set<ApplicationUser> getFollowing() {
+        return following;
+    }
+
+    public void setFollowing(Set<ApplicationUser> following) {
+        this.following = following;
+    }
+
+    public Set<ApplicationUser> getFollowers() {
+        return followers;
+    }
+
+    public void setFollowers(Set<ApplicationUser> followers) {
+        this.followers = followers;
+    }
+
+
     @Override
     public String toString() {
         return "ApplicationUser{" +
@@ -155,6 +221,10 @@ public class ApplicationUser {
                 ", enabled=" + enabled +
                 ", verification=" + verification +
                 ", password='" + password + '\'' +
+                ", profilePicture=" + profilePicture +
+                ", bannerPicture=" + bannerPicture +
+                ", following=" + following.size() +
+                ", followers=" + followers.size() +
                 ", authorities=" + authorities +
                 '}';
     }

@@ -57,6 +57,10 @@ public class SecurityConfiguration {
                 .csrf(csrf->csrf.disable())
                 .authorizeRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/images/**").permitAll()
+                        .requestMatchers("/user/followers/**").permitAll()
+                        .requestMatchers("/user/following/**").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.*;
+import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -38,7 +39,9 @@ public class TokenService {
  }
 
  public  String getUsernameFromToken(String token){
-  Jwt decoded = jwtDecoder.decode(token);
+  if(!token.substring(0,6).equals("Bearer"))throw new InvalidBearerTokenException("Token is not a bearer token.");
+  String strippedToken = token.substring(7);
+  Jwt decoded = jwtDecoder.decode(strippedToken);
   String username = decoded.getSubject();
   return username;
  }

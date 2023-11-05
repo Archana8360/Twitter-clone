@@ -1,16 +1,16 @@
 package com.example.Twitter.controllers;
 
-import com.example.Twitter.exceptions.EmailAlreadyTakenException;
-import com.example.Twitter.exceptions.EmailFailedToSendException;
-import com.example.Twitter.exceptions.IncorrectVerificationCodeException;
-import com.example.Twitter.exceptions.UserDoesNotExistException;
+import com.example.Twitter.dto.FindUsernameDTO;
+import com.example.Twitter.exceptions.*;
 import com.example.Twitter.models.ApplicationUser;
 import com.example.Twitter.models.LoginResponse;
 import com.example.Twitter.models.Registration;
 import com.example.Twitter.services.TokenService;
 import com.example.Twitter.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -99,7 +99,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody LinkedHashMap<String,String> body){
+    public LoginResponse login(@RequestBody LinkedHashMap<String,String> body) throws InvalidCredentialsException{
 
         String username = body.get("username");
         String password = body.get("password");
@@ -110,8 +110,21 @@ public class AuthenticationController {
             return new LoginResponse(userService.getUserByUsername(username),token);
 
         } catch(AuthenticationException e){
-                return new LoginResponse(null,"");
+            throw new InvalidCredentialsException();
         }
+    }
+
+    @ExceptionHandler({InvalidCredentialsException.class})
+    public ResponseEntity<String> handleInvalidCredentials(){
+        return new ResponseEntity<String>("Invalid credentials", HttpStatus.FORBIDDEN);
+    }
+
+    @PostMapping("/find")
+    public ResponseEntity<String> verifyUsername(@RequestBody FindUsernameDTO credential){
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.TEXT_PLAIN);
+        String username = userService.verifyUsername(credential);
+        return new ResponseEntity<String>(username, HttpStatus.OK);
     }
 
 
